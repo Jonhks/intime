@@ -1,0 +1,3 @@
+class DraftState {
+  String text = '';
+}

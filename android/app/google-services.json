@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "586869914327",
+    "project_id": "intime-app-d997b",
+    "storage_bucket": "intime-app-d997b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:586869914327:android:6372423d1426def7f3ce92",
+        "android_client_info": {
+          "package_name": "com.jonh.intime"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDi_uVfzu3ogmg67y-5yDhD3jbjdwR9GsY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
