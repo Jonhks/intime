@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'write_screen.dart';
+import '../widgets/responsive_layout.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    final rightContent = Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -34,6 +35,11 @@ class SplashScreen extends StatelessWidget {
           ],
         ),
       ),
+    );
+
+    return ResponsiveLayout(
+      rightChild: rightContent,
+      leftChild: Container(), // Left side is currently black/empty
     );
   }
 }
