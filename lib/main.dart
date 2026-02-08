@@ -16,10 +16,10 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   // 🔒 GARANTIZAR USUARIO ANÓNIMO UNA SOLA VEZ
-  final authService = AuthService();
-  if (authService.currentUser == null) {
-    await authService.signInAnonymously();
-  }
+  // final authService = AuthService();
+  // if (authService.currentUser == null) {
+  //   await authService.signInAnonymously();
+  // }
 
   runApp(const MyApp());
 }

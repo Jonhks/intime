@@ -57,4 +57,15 @@ class AuthService {
 
     await user.linkWithCredential(credential);
   }
+
+  Future<User> ensureAnonymousUser() async {
+    User? user = _auth.currentUser;
+
+    if (user == null) {
+      final result = await _auth.signInAnonymously();
+      user = result.user!;
+    }
+
+    return user;
+  }
 }

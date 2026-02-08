@@ -3,7 +3,6 @@ import '../state/draft_state.dart';
 import '../widgets/responsive_layout.dart';
 import '../auth/protect_words_screen.dart';
 import '../auth/auth_service.dart';
-// import '../auth/protect_words_screen.dart';
 import '../models/message.dart';
 import '../state/messages_store.dart';
 import 'package:uuid/uuid.dart';
@@ -22,19 +21,22 @@ class _WriteScreenState extends State<WriteScreen> {
   final DraftState draft = DraftState();
   final TextEditingController controller = TextEditingController();
   final AuthService _authService = AuthService();
+
   bool isForSomeone = false;
   final TextEditingController audienceController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
+
     if (widget.message != null) {
       draft.text = widget.message!.text;
-    }
-    controller.text = draft.text;
-    if (widget.message?.audienceLabel != null) {
-      isForSomeone = true;
-      audienceController.text = widget.message!.audienceLabel!;
+      controller.text = draft.text;
+
+      if (widget.message!.audienceLabel != null) {
+        isForSomeone = true;
+        audienceController.text = widget.message!.audienceLabel!;
+      }
     }
   }
 
@@ -46,6 +48,7 @@ class _WriteScreenState extends State<WriteScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
+            // Checkbox: escribir para alguien
             Row(
               children: [
                 Checkbox(
@@ -63,6 +66,7 @@ class _WriteScreenState extends State<WriteScreen> {
               ],
             ),
 
+            // Campo audiencia
             if (isForSomeone)
               Padding(
                 padding: const EdgeInsets.only(bottom: 12),
@@ -74,6 +78,8 @@ class _WriteScreenState extends State<WriteScreen> {
                   ),
                 ),
               ),
+
+            // Editor principal
             Expanded(
               child: TextField(
                 controller: controller,
@@ -87,11 +93,13 @@ class _WriteScreenState extends State<WriteScreen> {
                 },
               ),
             ),
+
             const SizedBox(height: 12),
+
+            // BOTÓN GUARDAR
             ElevatedButton(
               onPressed: () async {
-                final user = _authService.currentUser;
-
+                // Validación mínima
                 if (draft.text.trim().isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -101,50 +109,48 @@ class _WriteScreenState extends State<WriteScreen> {
                   return;
                 }
 
-                if (user == null) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const ProtectWordsScreen(),
-                    ),
-                  );
-                } else {
-                  final now = DateTime.now();
+                // 🔒 Crear usuario anónimo SOLO AQUÍ (si hace falta)
+                final user = await _authService.ensureAnonymousUser();
 
-                  final message = widget.message != null
-                      ? widget.message!.copyWith(
-                          text: draft.text,
-                          updatedAt: now,
-                        )
-                      : Message(
-                          id: const Uuid().v4(),
-                          text: draft.text,
-                          ownerId: user.uid,
-                          audienceLabel: isForSomeone
-                              ? audienceController.text.trim()
-                              : null,
-                          createdAt: now,
-                          updatedAt: now,
-                        );
+                final now = DateTime.now();
 
-                  // MessagesStore().save(message);
-                  await MessagesStore().save(message);
+                final message = widget.message != null
+                    ? widget.message!.copyWith(
+                        text: draft.text,
+                        updatedAt: now,
+                        audienceLabel: isForSomeone
+                            ? audienceController.text.trim()
+                            : null,
+                      )
+                    : Message(
+                        id: const Uuid().v4(),
+                        text: draft.text,
+                        ownerId: user.uid,
+                        audienceLabel: isForSomeone
+                            ? audienceController.text.trim()
+                            : null,
+                        createdAt: now,
+                        updatedAt: now,
+                      );
 
-                  // limpiar draft
-                  draft.text = '';
-                  controller.clear();
+                await MessagesStore().save(message);
 
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Mensaje guardado')),
-                  );
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (_) => const HomeScreen()),
-                    (route) => false,
-                  );
-                }
+                // Limpiar draft
+                draft.text = '';
+                controller.clear();
+                audienceController.clear();
+                isForSomeone = false;
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Mensaje guardado')),
+                );
+
+                // 👉 Pedir proteger palabras (upgrade de cuenta)
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ProtectWordsScreen()),
+                );
               },
-              // child: const Text('Guardar'),
               child: Text(
                 widget.message != null ? 'Guardar cambios' : 'Guardar mensaje',
               ),
@@ -154,9 +160,6 @@ class _WriteScreenState extends State<WriteScreen> {
       ),
     );
 
-    return ResponsiveLayout(
-      rightChild: rightContent,
-      leftChild: Container(), // Left side is currently black/empty
-    );
+    return ResponsiveLayout(rightChild: rightContent, leftChild: Container());
   }
 }
