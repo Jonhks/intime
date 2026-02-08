@@ -7,11 +7,20 @@ import 'theme/app_theme.dart';
 // import 'widgets/responsive_layout.dart';
 import 'auth/auth_service.dart';
 import 'screens/home_screen.dart';
-import 'screens/splash_screen.dart';
+// import 'screens/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Firebase Web necesita options
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // 🔒 GARANTIZAR USUARIO ANÓNIMO UNA SOLA VEZ
+  final authService = AuthService();
+  if (authService.currentUser == null) {
+    await authService.signInAnonymously();
+  }
+
   runApp(const MyApp());
 }
 

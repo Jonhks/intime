@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import '../widgets/responsive_layout.dart';
 import '../screens/login_screen.dart';
+import '../auth/auth_service.dart';
 
 class ProtectWordsScreen extends StatelessWidget {
   const ProtectWordsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final AuthService authService = AuthService();
+
     final rightContent = Scaffold(
       appBar: AppBar(
         title: const Text('Protege tus palabras'),
-        automaticallyImplyLeading: true, // permite volver atrás
+        automaticallyImplyLeading: true,
       ),
       body: Padding(
         padding: const EdgeInsets.all(24),
@@ -25,7 +28,7 @@ class ProtectWordsScreen extends StatelessWidget {
 
             const SizedBox(height: 16),
 
-            // Texto explicativo (clave)
+            // Texto explicativo
             Text(
               'Para que este mensaje no se pierda y solo tú puedas editarlo, '
               'necesitamos asociarlo a una cuenta segura.',
@@ -34,23 +37,36 @@ class ProtectWordsScreen extends StatelessWidget {
 
             const SizedBox(height: 32),
 
-            // Acción principal: Google
+            // ✅ GOOGLE SIGN-IN (REAL)
             ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => LoginScreen()),
-                );
+              onPressed: () async {
+                try {
+                  await authService.linkWithGoogle();
+                  Navigator.pop(context);
+                } catch (e) {
+                  debugPrint('🔥 ERROR GOOGLE AUTH: $e');
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(e.toString()),
+                      duration: const Duration(seconds: 6),
+                    ),
+                  );
+                }
               },
-              child: const Text('Entrar (temporal)'),
+
+              child: const Text('Continuar con Google'),
             ),
 
             const SizedBox(height: 12),
 
-            // Acción secundaria: Email
+            // EMAIL + PASSWORD (pantalla aparte)
             OutlinedButton(
               onPressed: () {
-                // aquí luego irá email + password
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const LoginScreen()),
+                );
               },
               child: const Text('Crear cuenta con email'),
             ),
@@ -69,9 +85,6 @@ class ProtectWordsScreen extends StatelessWidget {
       ),
     );
 
-    return ResponsiveLayout(
-      rightChild: rightContent,
-      leftChild: Container(), // lado visual, luego lo decoramos
-    );
+    return ResponsiveLayout(rightChild: rightContent, leftChild: Container());
   }
 }
